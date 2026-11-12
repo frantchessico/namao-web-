@@ -65,7 +65,10 @@ export function AppLayout() {
           </NavLink>
         </div>
       </header>
-      <Outlet />
+      {/* A chave muda a cada página (o modal de status fica por cima, sem remontar os Detalhes). */}
+      <div key={pathname.replace(/\/status$/, "")} className="page-enter">
+        <Outlet />
+      </div>
     </div>
   );
 }

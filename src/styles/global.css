@@ -1518,3 +1518,193 @@ textarea.input[aria-invalid="true"] {
   font-size: 12px;
   cursor: pointer;
 }
+
+/* ---------- Animações ---------- */
+
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --dur-fast: 160ms;
+  --dur: 280ms;
+  --dur-slow: 480ms;
+  --dur-exit: 160ms;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+@keyframes fade-out {
+  to { opacity: 0; }
+}
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(12px); }
+}
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+}
+@keyframes pop-out {
+  to { opacity: 0; transform: translateY(4px) scale(0.97); }
+}
+@keyframes dot-in {
+  from { opacity: 0; transform: translateX(-10px) scale(0.6); }
+}
+@keyframes grow-x {
+  from { transform: scaleX(0); }
+}
+@keyframes check-in {
+  0% { opacity: 0; transform: scale(0.4); }
+  60% { opacity: 1; transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* Entrada de página. "backwards" evita deixar transform no fim, que mudaria o posicionamento dos overlays fixos. */
+.page-enter {
+  animation: rise-in var(--dur) var(--ease-out) backwards;
+}
+.auth__form,
+.terms,
+.profile,
+.success__body > * {
+  animation: rise-in var(--dur-slow) var(--ease-out) backwards;
+}
+.success__body > :nth-child(2) { animation-delay: 60ms; }
+.success__body > :nth-child(3) { animation-delay: 120ms; }
+.success__body > :nth-child(4) { animation-delay: 180ms; }
+.success__body > :nth-child(5) { animation-delay: 240ms; }
+.success__icon {
+  animation: check-in var(--dur-slow) var(--ease-out) backwards;
+}
+
+/* Overlays: entrada e saída */
+.overlay {
+  animation: fade-in var(--dur) var(--ease-out) backwards;
+}
+.overlay .alert,
+.overlay .modal {
+  animation: pop-in var(--dur) var(--ease-out) backwards;
+}
+.overlay.is-closing {
+  animation: fade-out var(--dur-exit) var(--ease-in) forwards;
+  pointer-events: none;
+}
+.overlay.is-closing .alert,
+.overlay.is-closing .modal {
+  animation: pop-out var(--dur-exit) var(--ease-in) forwards;
+}
+
+/* Abas segmentadas com indicador deslizante */
+.tabs--slide {
+  position: relative;
+  isolation: isolate;
+}
+.tabs__indicator {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(100% / var(--tab-count, 2));
+  border-radius: var(--radius-tab);
+  background: var(--primary);
+  transform: translateX(calc(100% * var(--tab-index, 0)));
+  transition: transform var(--dur) var(--ease-out);
+}
+.tabs--slide .tab[aria-selected="true"] {
+  background: transparent;
+}
+.tab {
+  transition: color var(--dur-fast) ease, background-color var(--dur) var(--ease-out);
+}
+
+/* Botões, campos e linhas */
+.btn {
+  transition: filter var(--dur-fast), opacity var(--dur-fast), transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast);
+}
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.icon-btn {
+  transition: background-color var(--dur-fast), transform var(--dur-fast) var(--ease-out);
+}
+.icon-btn:active {
+  transform: scale(0.94);
+}
+.input,
+.select select,
+.search__box,
+.date-input {
+  transition: border-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease, background-color var(--dur-fast) ease;
+}
+.field-error {
+  animation: rise-in var(--dur-fast) var(--ease-out) backwards;
+}
+.table__row:not(.table__head) {
+  transition: background-color var(--dur-fast) ease;
+}
+.menu-list a,
+.menu-list button,
+.header__user,
+.user-avatar {
+  transition: background-color var(--dur-fast) ease, color var(--dur-fast) ease, border-color var(--dur-fast) ease;
+}
+
+/* Entradas em cascata (até 10 itens; os seguintes entram com o último atraso) */
+.table__row:not(.table__head),
+.result,
+.timeline li,
+.activity__row,
+.menu-list > * {
+  animation: rise-in var(--dur) var(--ease-out) backwards;
+  animation-delay: calc(var(--stagger, 9) * 35ms);
+}
+.table__row:nth-child(1), .result:nth-child(1), .timeline li:nth-child(1), .activity__row:nth-child(1), .menu-list > :nth-child(1) { --stagger: 0; }
+.table__row:nth-child(2), .result:nth-child(2), .timeline li:nth-child(2), .activity__row:nth-child(2), .menu-list > :nth-child(2) { --stagger: 1; }
+.table__row:nth-child(3), .result:nth-child(3), .timeline li:nth-child(3), .activity__row:nth-child(3), .menu-list > :nth-child(3) { --stagger: 2; }
+.table__row:nth-child(4), .result:nth-child(4), .timeline li:nth-child(4), .activity__row:nth-child(4), .menu-list > :nth-child(4) { --stagger: 3; }
+.table__row:nth-child(5), .result:nth-child(5), .timeline li:nth-child(5), .activity__row:nth-child(5), .menu-list > :nth-child(5) { --stagger: 4; }
+.table__row:nth-child(6), .result:nth-child(6), .timeline li:nth-child(6), .activity__row:nth-child(6), .menu-list > :nth-child(6) { --stagger: 5; }
+.table__row:nth-child(7), .result:nth-child(7), .timeline li:nth-child(7), .activity__row:nth-child(7), .menu-list > :nth-child(7) { --stagger: 6; }
+.table__row:nth-child(8), .result:nth-child(8), .timeline li:nth-child(8), .activity__row:nth-child(8), .menu-list > :nth-child(8) { --stagger: 7; }
+.table__row:nth-child(9), .result:nth-child(9), .timeline li:nth-child(9), .activity__row:nth-child(9), .menu-list > :nth-child(9) { --stagger: 8; }
+
+/* Pilha de estados: cada círculo entra por cima do anterior */
+.stack__dot,
+.stack__more {
+  animation: dot-in var(--dur) var(--ease-out) backwards;
+  animation-delay: calc(var(--dot, 0) * 40ms);
+}
+.stack > :nth-child(2) { --dot: 1; }
+.stack > :nth-child(3) { --dot: 2; }
+.stack > :nth-child(4) { --dot: 3; }
+.stack > :nth-child(5) { --dot: 4; }
+.stack > :nth-child(6) { --dot: 5; }
+.stack > :nth-child(7) { --dot: 6; }
+.stack > :nth-child(8) { --dot: 7; }
+.stack > :nth-child(9) { --dot: 8; }
+.stack > :nth-child(n + 10) { --dot: 9; }
+
+/* Barras de actividade crescem da esquerda */
+.activity__fill {
+  transform-origin: left center;
+  animation: grow-x var(--dur-slow) var(--ease-out) backwards;
+  animation-delay: 120ms;
+}
+
+/* O herói muda de cor suavemente quando o estado muda */
+.hero {
+  transition: background-color var(--dur-slow) var(--ease-out), box-shadow var(--dur-slow) var(--ease-out);
+}
+.pill {
+  transition: background-color var(--dur) ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+  }
+}

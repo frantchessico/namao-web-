@@ -1,9 +1,10 @@
-import { useEffect, useId, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppAlert } from "../components/AppAlert";
 import { DateField, SelectField, TextAreaField } from "../components/Fields";
 import { Close } from "../components/Icons";
 import { Title } from "../components/Layout";
+import { EXIT_MS, prefersReducedMotion } from "../hooks/usePresence";
 import { useStore } from "../store/AppStore";
 import { STATUS_TYPES, type StatusType } from "../types";
 import { fullName, todayIso } from "../utils/format";
@@ -23,7 +24,16 @@ export function StatusModal() {
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
 
-  const close = () => navigate(`/mutuarios/${id}`, { replace: true });
+  const [closing, setClosing] = useState(false);
+  const closingRef = useRef(false);
+  // Anima a saída e só depois sai da rota do modal.
+  const close = () => {
+    if (closingRef.current) return;
+    closingRef.current = true;
+    if (prefersReducedMotion()) return navigate(`/mutuarios/${id}`, { replace: true });
+    setClosing(true);
+    window.setTimeout(() => navigate(`/mutuarios/${id}`, { replace: true }), EXIT_MS);
+  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -71,7 +81,7 @@ export function StatusModal() {
 
   return (
     <div
-      className="overlay"
+      className={`overlay${closing ? " is-closing" : ""}`}
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) close();
       }}

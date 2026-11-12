@@ -14,7 +14,13 @@ type Props<T extends string> = {
 /** Abas segmentadas, iguais ao componente Option do app (Criados / Importados). */
 export function Tabs<T extends string>({ options, value, onChange, label, disabled, style }: Props<T>) {
   return (
-    <div className="tabs" role="tablist" aria-label={label} style={style}>
+    <div
+      className="tabs tabs--slide"
+      role="tablist"
+      aria-label={label}
+      style={{ ...style, "--tab-count": options.length, "--tab-index": Math.max(0, options.findIndex((o) => o.value === value)) } as CSSProperties}
+    >
+      <span className="tabs__indicator" aria-hidden="true" />
       {options.map((o) => (
         <button
           key={o.value}

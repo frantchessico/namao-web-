@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef } from "react";
+import { usePresence } from "../hooks/usePresence";
 
 export type AlertAction = {
   text: string;
@@ -18,17 +19,23 @@ type Props = {
 export function AppAlert({ open, title, message, actions, onClose }: Props) {
   const titleId = useId();
   const primaryRef = useRef<HTMLButtonElement>(null);
-  const list: AlertAction[] = actions?.length ? actions : [{ text: "OK" }];
+  const { mounted, closing } = usePresence(open);
+  // Durante a saída o pai já pode ter limpo o título; mostra-se o último conteúdo aberto.
+  const last = useRef({ title, message, actions });
+  if (open) last.current = { title, message, actions };
+  const view = open ? { title, message, actions } : last.current;
+  const list: AlertAction[] = view.actions?.length ? view.actions : [{ text: "OK" }];
 
   useEffect(() => {
     if (open) primaryRef.current?.focus();
   }, [open]);
 
-  if (!open) return null;
+  if (!mounted) return null;
 
   return (
     <div
-      className="overlay overlay--center"
+      className={`overlay overlay--center${closing ? " is-closing" : ""}`}
+      inert={closing || undefined}
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -41,9 +48,9 @@ export function AppAlert({ open, title, message, actions, onClose }: Props) {
           !
         </div>
         <h2 id={titleId} className="alert__title">
-          {title}
+          {view.title}
         </h2>
-        {message && <p className="alert__message">{message}</p>}
+        {view.message && <p className="alert__message">{view.message}</p>}
         <div className="alert__actions">
           {list.map((a, i) => {
             const isPrimary = list.length === 1 || (a.style !== "cancel" && i === list.length - 1);
