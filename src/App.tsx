@@ -13,6 +13,7 @@ import { Search } from "./pages/Search";
 import { StatusModal } from "./pages/StatusModal";
 import { Success } from "./pages/Success";
 import { AppStoreProvider, useStore } from "./store/AppStore";
+import { track } from "./analytics";
 
 /** Faixa discreta para repor os dados de exemplo durante testes. */
 function PrototypeBar() {
@@ -23,6 +24,7 @@ function PrototypeBar() {
       <button
         type="button"
         onClick={() => {
+          track("demo_reset");
           resetDemo();
           window.location.assign("/mutuarios");
         }}

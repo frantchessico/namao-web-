@@ -5,6 +5,7 @@ import { Title, useDocumentTitle } from "../../components/Layout";
 import { useStore } from "../../store/AppStore";
 import { isValidEmail } from "../../utils/ids";
 import { AuthBrand } from "./AuthBrand";
+import { track } from "../../analytics";
 
 export function Login() {
   useDocumentTitle("Entrar");
@@ -23,6 +24,7 @@ export function Login() {
     setError(undefined);
     setLoading(true);
     await requestCode(email);
+    track("login_code_requested");
     setLoading(false);
     navigate("/entrar/codigo");
   };

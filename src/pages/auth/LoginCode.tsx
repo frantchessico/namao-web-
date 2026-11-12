@@ -4,6 +4,7 @@ import { Title, useDocumentTitle } from "../../components/Layout";
 import { INVALID_DEMO_CODE } from "../../data/mock";
 import { delay, useStore } from "../../store/AppStore";
 import { AuthBrand } from "./AuthBrand";
+import { track } from "../../analytics";
 
 const LENGTH = 6;
 
@@ -44,14 +45,17 @@ export function LoginCode() {
     setLoading(false);
     if (code === INVALID_DEMO_CODE) {
       setError("Código inválido");
+      track("login_code_invalid");
       return;
     }
+    track("login_completed", { first_access: !auth.termsAccepted });
     confirmLogin();
     navigate(auth.termsAccepted ? "/mutuarios" : "/termos", { replace: true });
   };
 
   const resend = async () => {
     await requestCode(auth.pendingEmail ?? "");
+    track("login_code_resent");
     setNotice("Enviámos um novo código para o seu email.");
   };
 

@@ -6,6 +6,7 @@ import { Title, useDocumentTitle } from "../components/Layout";
 import { useStore } from "../store/AppStore";
 import { borrowerColor, formatDate, formatShortDate, fullName, latestStatus, STATUS_COLORS } from "../utils/format";
 import { formatPhone } from "../utils/ids";
+import { track } from "../analytics";
 
 const VISIBLE = 3;
 
@@ -40,6 +41,7 @@ export function Details() {
   const doImport = async () => {
     setImporting(true);
     await importBorrower(b.id);
+    track("borrower_imported", { from: "details" });
     setImporting(false);
     navigate("/sucesso", {
       state: { title: "Importação", subtitle: "Completa!", message: "Agora você pode verificar o cadastro do seu mutuário!", next: `/mutuarios/${b.id}`, nextLabel: "Ver mutuário" },

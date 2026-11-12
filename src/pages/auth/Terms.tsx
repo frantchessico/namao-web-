@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Title, useDocumentTitle } from "../../components/Layout";
 import { useStore } from "../../store/AppStore";
+import { track } from "../../analytics";
 
 // Texto de sgm-app/src/pages/TermsConditions.
 const ARTICLES: { title: string; body: string }[] = [
@@ -94,6 +95,7 @@ export function Terms() {
                 style={{ flex: "0 1 320px", fontWeight: 500 }}
                 onClick={() => {
                   acceptTerms();
+                  track("terms_accepted");
                   navigate("/mutuarios", { replace: true });
                 }}
               >

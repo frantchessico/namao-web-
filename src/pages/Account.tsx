@@ -4,6 +4,7 @@ import { Title, useDocumentTitle } from "../components/Layout";
 import { useStore } from "../store/AppStore";
 import { STATUS_TYPES } from "../types";
 import { latestStatus, STATUS_COLORS } from "../utils/format";
+import { track } from "../analytics";
 
 // Ordem do ecrã de Conta do app: em andamento, sem crédito, devedor.
 const ORDER = [STATUS_TYPES[1], STATUS_TYPES[0], STATUS_TYPES[2]];
@@ -33,6 +34,7 @@ export function Account() {
             type="button"
             className="profile__logout"
             onClick={() => {
+              track("logout");
               logout();
               navigate("/entrar", { replace: true });
             }}

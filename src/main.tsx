@@ -1,10 +1,13 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { Analytics } from "@vercel/analytics/react";
+import { beforeSend } from "./analytics";
 import { App } from "./App";
 import "./styles/global.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App />
+    <Analytics beforeSend={beforeSend} />
   </StrictMode>
 );

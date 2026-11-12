@@ -8,6 +8,7 @@ import { Tabs } from "../components/Tabs";
 import { useStore } from "../store/AppStore";
 import type { Borrower } from "../types";
 import { formatDate, fullName, lastUpdate } from "../utils/format";
+import { track } from "../analytics";
 
 type Tab = "criados" | "importados";
 
@@ -24,6 +25,7 @@ export function Borrowers() {
   const confirmRemove = async (b: Borrower) => {
     setBusyId(b.id);
     await removeImport(b.id);
+    track("import_removed");
     setBusyId(null);
   };
 

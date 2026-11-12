@@ -18,6 +18,7 @@ import {
   normalizeBi,
   normalizeNuit,
 } from "../utils/ids";
+import { track } from "../analytics";
 
 const LABEL: Record<SearchType, string> = { nuit: "NUIT", bi: "BI" };
 
@@ -42,6 +43,7 @@ export function Search() {
   const changeType = (t: SearchType) => {
     if (t === searchType) return;
     setSearchType(t);
+    track("search_type_changed", { type: t });
     setValue("");
     setTouched(false);
     setResult(null);
@@ -49,14 +51,23 @@ export function Search() {
 
   const submit = async () => {
     setTouched(true);
-    if (!valid) return;
+    if (!valid) {
+      if (normalized.length > 0) track("search_invalid_format", { type: searchType });
+      return;
+    }
     setLoading(true);
     setResult(null);
     try {
       const r = await search(searchType, normalized);
+      track("search_performed", {
+        type: searchType,
+        outcome: r.results.length === 0 ? "not_found" : r.results.some((x) => x.owner === "me") ? "mine" : "other_institution",
+        results: r.results.length,
+      });
       if (r.results.length === 0) setNotFound(normalized);
       else setResult(r);
     } catch {
+      track("search_failed", { type: searchType });
       setFailed(true);
     } finally {
       setLoading(false);
@@ -66,6 +77,7 @@ export function Search() {
   const doImport = async (b: Borrower) => {
     setImportingId(b.id);
     await importBorrower(b.id);
+    track("borrower_imported", { from: "search" });
     setImportingId(null);
     navigate("/sucesso", {
       state: {

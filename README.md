@@ -43,6 +43,32 @@ O botão **Repor dados** (canto inferior esquerdo) volta aos dados de exemplo.
 
 Toda a "API" está em `src/store/AppStore.tsx`. Cada acção tem um comentário com o endpoint do back-end que vai substituir (`POST /borrowers/search`, `POST /borrowers`, `POST /borrowers/requests/:borrower`, …). As páginas só falam com o store, por isso a integração fica concentrada nesse ficheiro.
 
+## Analytics
+
+Usa o **Vercel Web Analytics** (`@vercel/analytics`), que não usa cookies. Conta as visitas a cada página e uma lista fechada de eventos, toda definida em `src/analytics.ts`.
+
+**O que nunca é enviado:** NUIT, BI, nomes, emails, telefones e ids de mutuários. Os endereços passam por `scrubUrl` antes de sair do browser: `/mutuarios/b_ana/status` chega como `/mutuarios/[id]/status`, e só o parâmetro `?aba=` é mantido.
+
+| Evento | Propriedades |
+|---|---|
+| `login_code_requested`, `login_code_resent`, `login_code_invalid` | — |
+| `login_completed` | `first_access` |
+| `terms_accepted`, `logout`, `account_deleted` | — |
+| `search_type_changed`, `search_invalid_format`, `search_failed` | `type` (nuit/bi) |
+| `search_performed` | `type`, `outcome` (mine / other_institution / not_found), `results` |
+| `register_started`, `register_duplicate`, `register_cancelled` | `from` (nuit/bi) |
+| `register_validation_failed` | `fields` (n.º de campos com erro) |
+| `borrower_created` | `from`, `doc_type`, `status`, `has_email` |
+| `status_added` | `status`, `changed` (se mudou em relação ao último estado) |
+| `borrower_imported` | `from` (search/details) |
+| `import_removed`, `demo_reset` | — |
+
+- **Activar:** no projecto da Vercel, separador *Analytics* → *Enable*. Os dados aparecem após o próximo deploy.
+- **Plano da Vercel:** as visitas às páginas funcionam no plano gratuito; os eventos personalizados precisam do plano Pro.
+- **Em desenvolvimento:** nada é enviado; cada evento aparece na consola como `[analytics]`.
+- **Desligar num browser:** `localStorage.setItem("namao-analytics-optout", "1")`.
+- **Novo evento:** acrescentá-lo ao tipo `AnalyticsEvents` em `src/analytics.ts` e chamar `track("nome", {...})`. O TypeScript obriga às propriedades certas.
+
 ## Deploy na Vercel
 
 O projecto já tem `vercel.json` (Vite, `npm ci`, `npm run build`, saída em `dist/`) e uma regra que manda todas as rotas para `index.html`, para que links directos como `/mutuarios/b_ana` ou um refresh não deem 404. Não precisa de variáveis de ambiente.

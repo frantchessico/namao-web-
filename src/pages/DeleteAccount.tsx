@@ -5,6 +5,7 @@ import { TextField } from "../components/Fields";
 import { ArrowLeft } from "../components/Icons";
 import { Title, useDocumentTitle } from "../components/Layout";
 import { delay, useStore } from "../store/AppStore";
+import { track } from "../analytics";
 
 export function DeleteAccount() {
   useDocumentTitle("Eliminar conta");
@@ -24,6 +25,7 @@ export function DeleteAccount() {
   const doDelete = async () => {
     setSubmitting(true);
     await delay(800);
+    track("account_deleted");
     deleteAccount();
     navigate("/entrar", { replace: true });
   };

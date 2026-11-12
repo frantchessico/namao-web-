@@ -8,6 +8,7 @@ import { EXIT_MS, prefersReducedMotion } from "../hooks/usePresence";
 import { useStore } from "../store/AppStore";
 import { STATUS_TYPES, type StatusType } from "../types";
 import { fullName, todayIso } from "../utils/format";
+import { track } from "../analytics";
 
 /** Modal "Status." aberto por cima dos Detalhes (rota /mutuarios/:id/status). */
 export function StatusModal() {
@@ -61,7 +62,9 @@ export function StatusModal() {
     if (Object.keys(errs).length) return;
     setSaving(true);
     try {
+      const previous = b.statuses[b.statuses.length - 1]?.type;
       await addStatus(b.id, { type: type as StatusType, note: note.trim(), date });
+      track("status_added", { status: type as StatusType, changed: previous !== type });
       navigate("/sucesso", {
         replace: true,
         state: {

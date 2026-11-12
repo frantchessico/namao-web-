@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AppAlert } from "../components/AppAlert";
 import { DateField, SelectField, TextAreaField, TextField } from "../components/Fields";
@@ -17,6 +17,7 @@ import {
   normalizeNuit,
   normalizePhone,
 } from "../utils/ids";
+import { track } from "../analytics";
 
 type Form = {
   firstName: string;
@@ -90,6 +91,12 @@ export function Register() {
   const [saving, setSaving] = useState(false);
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [alert, setAlert] = useState<{ title: string; message: string } | null>(null);
+  const from = verifiedBi ? "bi" : "nuit";
+
+  useEffect(() => {
+    if (verifiedNuit || verifiedBi) track("register_started", { from });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // O cadastro começa sempre por uma pesquisa (como no app): sem identificador verificado, volta-se à pesquisa.
   if (!verifiedNuit && !verifiedBi) {
@@ -118,6 +125,7 @@ export function Register() {
     const errs = validate(form);
     setErrors(errs);
     if (Object.keys(errs).length > 0) {
+      track("register_validation_failed", { fields: Object.keys(errs).length });
       setAlert({ title: "Dados incompletos", message: "Corrija os campos assinalados antes de continuar." });
       return;
     }
@@ -125,6 +133,7 @@ export function Register() {
     const nuit = form.nuit ? normalizeNuit(form.nuit) : undefined;
     const dup = findDuplicate({ nuit, docType: form.docType, docNumber });
     if (dup) {
+      track("register_duplicate", { from });
       setAlert({
         title: "Mutuário já existe",
         message: `${fullName(dup)} já está registado com este ${dup.nuit === nuit ? "NUIT" : "documento"}.`,
@@ -146,6 +155,12 @@ export function Register() {
       initialStatus: { type: form.statusType as StatusType, note: form.statusNote.trim() },
     });
     setSaving(false);
+    track("borrower_created", {
+      from,
+      doc_type: form.docType as DocType,
+      status: form.statusType as StatusType,
+      has_email: Boolean(form.email.trim()),
+    });
     navigate("/sucesso", {
       replace: true,
       state: {
@@ -291,7 +306,14 @@ export function Register() {
         onClose={() => setConfirmCancel(false)}
         actions={[
           { text: "Continuar a editar", style: "cancel" },
-          { text: "Cancelar", style: "destructive", onPress: () => navigate("/mutuarios") },
+          {
+            text: "Cancelar",
+            style: "destructive",
+            onPress: () => {
+              track("register_cancelled", { from });
+              navigate("/mutuarios");
+            },
+          },
         ]}
       />
       <AppAlert open={alert !== null} title={alert?.title ?? ""} message={alert?.message} onClose={() => setAlert(null)} />
